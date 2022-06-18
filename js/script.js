@@ -1,5 +1,7 @@
 const todos = [];
 const RENDER_EVENT = 'render-todo';
+const SAVED_EVENT = 'saved-todo';
+const STORAGE_KEY = 'TODO_APPS';
 
 document.addEventListener('DOMContentLoaded', function () {
     const submitForm = document.getElementById('form');
@@ -25,6 +27,10 @@ document.addEventListener(RENDER_EVENT, function () {
     }
 })
 
+document.addEventListener(SAVED_EVENT, function () {
+    console.log(localStorage.getItem(STORAGE_KEY));
+  });
+
 function addTodo() {
     const textTodo = document.getElementById('title').value;
     const timestamp = document.getElementById('date').value;
@@ -34,6 +40,7 @@ function addTodo() {
     todos.push(todoObject);
 
     document.dispatchEvent(new Event(RENDER_EVENT));
+    saveData();
 }
 
 function generatedId() {
@@ -48,6 +55,22 @@ function generateTodoObject(id, task, timestamp, isCompleted) {
         isCompleted
     }
 }
+
+function isStorageExist() {
+    if (typeof (Storage) === undefined) {
+        alert('Browser kamu tidak mendukung local storage')
+        return false;
+    }
+    return true;
+}
+
+function saveData() {
+    if (isStorageExist()) {
+      const parsed = JSON.stringify(todos);
+      localStorage.setItem(STORAGE_KEY, parsed);
+      document.dispatchEvent(new Event(SAVED_EVENT));
+    }
+  }
 
 function makeTodo(todoObject) {
     const textTile = document.createElement('h2');
@@ -99,6 +122,7 @@ function makeTodo(todoObject) {
 
         todoTarget.isCompleted = true;
         document.dispatchEvent(new Event(RENDER_EVENT));
+        saveData();
     }
 
     function findTodo(todoId) {
@@ -117,6 +141,7 @@ function makeTodo(todoObject) {
 
         todos.splice(todoTarget, 1);
         document.dispatchEvent(new Event(RENDER_EVENT));
+        saveData();
     }
 
     function undoTaskFromCompleted(todoId) {
@@ -126,6 +151,7 @@ function makeTodo(todoObject) {
 
         todoTarget.isCompleted = false;
         document.dispatchEvent(new Event(RENDER_EVENT));
+        saveData();
     }
 
     function findTodoIndex(todoId) {
